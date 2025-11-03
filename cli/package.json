@@ -1,0 +1,31 @@
+{
+  "name": "vlei-ts-cli",
+  "version": "2.0.0",
+  "description": "vLEI TypeScript CLI with proper GLEIF patterns",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "schema-server": "node schema-server.js",
+
+    "setup:vlei": "npm run build && node build/index.js setup-vlei",
+    "dev": "ts-node src/index.ts",
+    "clean": "rm -rf build data/*.json",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": ["vLEI", "KERI", "ACDC", "GLEIF", "identity"],
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "signify-ts": "0.3.0-rc1",
+    "commander": "^11.1.0",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # KERIA Agent Service - Core identity/credential operations
+  keria:
+    image: weboftrust/keria:latest
+    container_name: vlei-keria
+    ports:
+      - "3901:3901"  # Main API port
+      - "3903:3903"  # Boot port
+    environment:
+      - KERI_AGENT_HTTP_PORT=3901
+      - KERI_BOOT_URL=http://0.0.0.0:3903
+    volumes:
+      - keria-data:/usr/local/var/keri
+    networks:
+      - vlei-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3901"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Witness Nodes (Provide consensus for key events)
+  witness1:
+    image: weboftrust/keripy:latest
+    container_name: vlei-witness1
+    command: kli witness demo --name witness1 --tcp 5631 --http 5641
+    ports:
+      - "5641:5641"
+    networks:
+      - vlei-network
+    restart: unless-stopped
+
+  witness2:
+    image: weboftrust/keripy:latest
+    container_name: vlei-witness2
+    command: kli witness demo --name witness2 --tcp 5632 --http 5642
+    ports:
+      - "5642:5642"
+    networks:
+      - vlei-network
+    restart: unless-stopped
+
+  witness3:
+    image: weboftrust/keripy:latest
+    container_name: vlei-witness3
+    command: kli witness demo --name witness3 --tcp 5633 --http 5643
+    ports:
+      - "5643:5643"
+    networks:
+      - vlei-network
+    restart: unless-stopped
+
+  # vLEI Schema Server (Hosts credential schemas)
+  vlei-server:
+    image: gleif/vlei-server:latest
+    container_name: vlei-schema-server
+    ports:
+      - "7723:7723"
+    networks:
+      - vlei-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7723"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  keria-data:
+
+networks:
+  vlei-network:
+    driver: bridge

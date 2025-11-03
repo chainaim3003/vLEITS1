@@ -1,0 +1,216 @@
+# CREDENTIAL ISSUANCE FLOW DIAGRAM
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    KERI/ACDC CREDENTIAL ISSUANCE FLOW                    │
+│                  (Issuer → Holder via IPEX Protocol)                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 1: CREATE CREDENTIAL REGISTRY (Issuer)                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+  
+  Issuer Client
+       │
+       ├─► registries().create(...)
+       │
+       └─► Returns: Registry SAID (identifier)
+           Used to anchor all credentials from this registry
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 2: ISSUE CREDENTIAL (Issuer)                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  Issuer Client
+       │
+       ├─► credentials().issue(alias, {
+       │       ri: registry.regk,      // Registry identifier
+       │       s: schemaSaid,           // Schema identifier
+       │       a: {                     // Attributes
+       │           i: holderAid.i,     // Holder's AID
+       │           ...claims           // Credential data
+       │       }
+       │   })
+       │
+       ├─► Wait for operation to complete
+       │
+       └─► Returns: Credential SAID
+           ⚠️  BUT: Operation response is INCOMPLETE!
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 3: 🔑 RETRIEVE FULL CREDENTIAL (Issuer) - CRITICAL!               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  ❌ WRONG:
+     const cred = issueResponse.response;  // Missing IPEX fields!
+
+  ✅ CORRECT:
+     await sleep(1000);  // Let KERIA store it
+     const cred = await client.credentials().get(credentialSaid);
+
+  Issuer Client
+       │
+       ├─► credentials().get(credentialSaid)
+       │
+       └─► Returns COMPLETE credential with ALL fields:
+           {
+             sad: { ... },      // ✅ The ACDC itself
+             iss: { ... },      // ✅ Issuance event (TEL)
+             anc: { ... },      // ✅ Anchor event (KEL)
+             ancatc: "..."      // ✅ Anchor signatures
+           }
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 4: GRANT VIA IPEX (Issuer → Holder)                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  Issuer Client
+       │
+       ├─► ipex().grant({
+       │       senderName: issuerAlias,
+       │       acdc: new Serder(cred.sad),      // ✅ From retrieved cred
+       │       iss: new Serder(cred.iss),       // ✅ From retrieved cred
+       │       anc: new Serder(cred.anc),       // ✅ From retrieved cred
+       │       ancAttachment: cred.ancatc,      // ✅ From retrieved cred
+       │       recipient: holderAid.i,
+       │       datetime: timestamp
+       │   })
+       │
+       ├─► ipex().submitGrant(...)
+       │
+       └─► Sends IPEX 'exn' message to Holder
+           Creates notification for Holder
+
+          ┌──────────────────────────────────┐
+          │    NETWORK TRANSMISSION          │
+          │    (IPEX Grant Message)          │
+          └──────────────────────────────────┘
+                       │
+                       ▼
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 5: RECEIVE NOTIFICATION (Holder)                                  ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  Holder Client
+       │
+       ├─► notifications().list()
+       │   Filter: route = '/exn/ipex/grant', read = false
+       │
+       ├─► Find grant notification
+       │
+       └─► exchanges().get(notification.a.d)
+           Retrieves full grant message with credential
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 6: ADMIT CREDENTIAL (Holder → Issuer)                             ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  Holder Client
+       │
+       ├─► ipex().admit({
+       │       senderName: holderAlias,
+       │       grantSaid: notification.a.d,
+       │       recipient: issuerAid.i,
+       │       datetime: timestamp
+       │   })
+       │
+       ├─► ipex().submitAdmit(...)
+       │
+       ├─► notifications().mark(notification.i)  // Mark as read
+       │
+       └─► credentials().get(credentialSaid)     // Credential now in store!
+
+          ┌──────────────────────────────────┐
+          │    NETWORK TRANSMISSION          │
+          │    (IPEX Admit Message)          │
+          └──────────────────────────────────┘
+                       │
+                       ▼
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ STEP 7: RECEIVE ADMIT NOTIFICATION (Issuer)                            ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+  Issuer Client
+       │
+       ├─► notifications().list()
+       │   Filter: route = '/exn/ipex/admit', read = false
+       │
+       ├─► Find admit notification
+       │
+       └─► notifications().mark(notification.i)  // Mark as read
+
+╔═══════════════════════════════════════════════════════════════════════╗
+║                         ISSUANCE COMPLETE!                             ║
+║  • Credential issued and recorded in TEL                               ║
+║  • Credential anchored to KEL                                          ║
+║  • Credential transferred to Holder via IPEX                           ║
+║  • Holder has admitted and stored credential                           ║
+║  • Both parties acknowledged via notifications                         ║
+╚═══════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      KEY ARCHITECTURAL POINTS                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+1. KEL (Key Event Log)
+   - Tracks the AID's key state (rotation events)
+   - Provides cryptographic proof of control
+
+2. TEL (Transaction Event Log) 
+   - Tracks credential lifecycle (issuance, revocation)
+   - Anchored to KEL for security
+
+3. IPEX (Issuance and Presentation Exchange)
+   - Protocol for credential exchange
+   - Uses 'exn' (exchange) messages
+   - Two-way acknowledgment (grant → admit)
+
+4. Serder (Serializer/Deserializer)
+   - Converts KERI events to/from CESR format
+   - Used for signing and verification
+
+5. Critical Pattern
+   - ✅ Always retrieve credential from client store before IPEX
+   - ❌ Never use operation response directly for IPEX
+   - ⏱️  Add small delay after issuance for KERIA processing
+
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    DATA STRUCTURE COMPARISON                             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+❌ OPERATION RESPONSE (incomplete):
+{
+  response: {
+    ced: { d: "SAID..." },  // Just the SAID
+    // Missing: sad, iss, anc, ancatc
+  }
+}
+
+✅ CLIENT STORE (complete):
+{
+  sad: {                    // The ACDC
+    v: "ACDC10JSON...",
+    d: "SAID...",
+    i: "issuer_AID",
+    ri: "registry_SAID",
+    s: "schema_SAID",
+    a: { /* attributes */ }
+  },
+  iss: {                    // TEL issuance event
+    v: "KERI10JSON...",
+    t: "iss",
+    d: "event_SAID",
+    // ... event details
+  },
+  anc: {                    // KEL anchor event
+    v: "KERI10JSON...",
+    t: "ixn",  // or "rot"
+    d: "event_SAID",
+    // ... anchor data
+  },
+  ancatc: "-AAB..."         // Signatures
+}

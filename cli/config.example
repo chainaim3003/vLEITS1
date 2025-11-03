@@ -1,0 +1,72 @@
+{
+  "root": {
+    "alias": "GLEIF_ROOT",
+    "registryName": "GLEIF_ROOT_REGISTRY"
+  },
+  "qvi": {
+    "alias": "QVI",
+    "lei": "254900OPPU84GM83MG36",
+    "registryName": "QVI_REGISTRY"
+  },
+  "organizations": [
+    {
+      "id": "jupiter",
+      "alias": "Jupiter_Knitting_Mills",
+      "name": "Jupiter Knitting Mills Inc",
+      "lei": "9845002862F66EBD0E2B",
+      "registryName": "JUPITER_REGISTRY",
+      "persons": [
+        {
+          "alias": "Sarah_Johnson",
+          "legalName": "Sarah Johnson",
+          "officialRole": "Seller Representative",
+          "agents": [
+            {
+              "alias": "Seller_AI_Agent",
+              "engagementContextRole": "Seller Agent",
+              "agentType": "AI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "acme",
+      "alias": "ACME_Corporation",
+      "name": "ACME Corporation",
+      "lei": "5493001KJTIIGC8Y1R12",
+      "registryName": "ACME_REGISTRY",
+      "persons": [
+        {
+          "alias": "John_Doe",
+          "legalName": "John Doe",
+          "officialRole": "Buyer Representative",
+          "agents": [
+            {
+              "alias": "Buyer_AI_Agent",
+              "engagementContextRole": "Buyer Agent",
+              "agentType": "AI"
+            },
+            {
+              "alias": "Procurement_AI_Agent",
+              "engagementContextRole": "Procurement Agent",
+              "agentType": "AI"
+            }
+          ]
+        },
+        {
+          "alias": "Jane_Smith",
+          "legalName": "Jane Smith",
+          "officialRole": "Finance Officer",
+          "agents": [
+            {
+              "alias": "Finance_AI_Agent",
+              "engagementContextRole": "Finance Agent",
+              "agentType": "AI"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

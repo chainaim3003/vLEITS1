@@ -1,0 +1,23 @@
+[
+  {
+    "alias": "GLEIF_ROOT",
+    "prefix": "ELshkQDE3BK68FedVf3usRzSHhLRyfrVc8d0X973QyHW",
+    "type": "root",
+    "registry": "EJNt-S5nq32o77OkN1OCCzPs9EZ1E42uZ1wzKxCH1IuJ",
+    "oobis": [
+      "http://keria:3902/oobi/ELshkQDE3BK68FedVf3usRzSHhLRyfrVc8d0X973QyHW/agent/EMoCuF7COTneL3RYE5Q5rigkL4R-cHzjLJJSSxqxsdHl"
+    ],
+    "createdAt": "2025-11-03T18:25:10.679Z"
+  },
+  {
+    "alias": "QVI",
+    "prefix": "EPJ3u4LLCEhzrLoezKUkYigXUHykP3qw0RFX-Ddgm92_",
+    "lei": "254900OPPU84GM83MG36",
+    "type": "qvi",
+    "registry": "EAY8Znl_SmfhdY3PB0de34wgjwX27S9WA8Qd9UHrIc2c",
+    "oobis": [
+      "http://keria:3902/oobi/EPJ3u4LLCEhzrLoezKUkYigXUHykP3qw0RFX-Ddgm92_/agent/EMs-eMhsdaZQnkjGL5oqySbwnk8lcIlcxd_zMfCvZV6D"
+    ],
+    "createdAt": "2025-11-03T18:25:27.894Z"
+  }
+]
