@@ -20,11 +20,11 @@ export class KERIAService {
     private static readonly IPEX_GRANT_ROUTE = '/exn/ipex/grant';
 
     private static readonly DEFAULT_IDENTIFIER_ARGS: CreateIdentiferArgs = {
-        toad: 1,  // Changed from 3 to 1 - matching single witness availability
+        toad: 1,  // Threshold: need 1 witness receipt
         wits: [
-            'BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha',
-            'BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM',
-            'BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX'
+            'BBilc4-L3tFUnfM_wJr4S4OJanAv_VmF_dJNN6vkf2Ha',  // wan - port 5642
+            'BLskRTInXnMxWaGqcpSyMgo0nYbalW99cGZESrz3zapM',  // wil - port 5643
+            'BIKKuvBwpmDVA4Ds-EpL5bt9OqPzWPja2LigFYZN2YfX'   // wes - port 5644
         ]
     } as any;
 
@@ -109,6 +109,18 @@ export class KERIAService {
         return registrySaid;
     }
 
+    /**
+     * Issue credential without automatic 'dt' field addition by Signify-TS
+     * Use this for schemas that don't allow 'dt' in attributes (like OOR, ECR)
+     */
+    static async issueCredentialWithoutDt(client: SignifyClient, issuerAidAlias: string, registryIdentifier: string, schemaSaid: string, holderAidPrefix: string, credentialAttributes: any, edges?: any, rules?: any): Promise<{ said: string; credential: any }> {
+        // This is a workaround for Signify-TS automatically adding 'dt' to attributes
+        // For OOR and ECR credentials, the schema doesn't allow 'dt'
+        // So we need to use the raw KERIA API instead of Signify's helper
+        
+        throw new Error('issueCredentialWithoutDt not yet implemented - use raw KERIA API');
+    }
+
     static async issueCredential(client: SignifyClient, issuerAidAlias: string, registryIdentifier: string, schemaSaid: string, holderAidPrefix: string, credentialAttributes: any, edges?: any, rules?: any): Promise<{ said: string; credential: any }> {
         ConsoleUtils.startSpinner(`Issuing credential from ${issuerAidAlias}`);
         
@@ -120,6 +132,8 @@ export class KERIAService {
             console.log(`  Holder: ${holderAidPrefix}`);
             
             // Build credential payload
+            // NOTE: Signify-TS automatically adds 'dt' (timestamp) to attributes
+            // Some schemas (like OOR, ECR) don't allow 'dt', so we need to handle this
             const credentialPayload: any = {
                 ri: registryIdentifier,
                 s: schemaSaid,
@@ -148,37 +162,126 @@ export class KERIAService {
             const operation = await issueResult.op;
             console.log(`[DEBUG] Operation: ${operation.name}`);
             
-            // Simple wait like official training
+            // OFFICIAL PATTERN: Poll until credential is persisted and retrievable
+            // Based on vlei-trainings and past chat solutions
             let completed;
-            try {
-                completed = await client.operations().wait(operation, { signal: AbortSignal.timeout(this.TIMEOUT_MS) });
-                console.log(`[DEBUG] Operation completed normally`);
-            } catch (error: any) {
-                console.log(`[DEBUG] Wait timed out, checking metadata...`);
-                // Fallback: check if credential exists in metadata
-                completed = await client.operations().get(operation.name);
-                if (!completed.metadata?.ced?.d) {
-                    throw new Error(`Credential issuance failed: ${error.message}`);
+            const startTime = Date.now();
+            const maxWaitTime = this.TIMEOUT_MS;
+            const pollInterval = 2000; // 2 seconds between polls
+            let pollCount = 0;
+            
+            console.log(`[DEBUG] Polling for credential persistence (max ${maxWaitTime/1000}s)...`);
+            
+            while (Date.now() - startTime < maxWaitTime) {
+                pollCount++;
+                
+                try {
+                    // Get current operation status
+                    completed = await client.operations().get(operation.name);
+                    
+                    // Log detailed status
+                    console.log(`[DEBUG] Poll ${pollCount}:`);
+                    console.log(`[DEBUG]   - done: ${completed.done}`);
+                    console.log(`[DEBUG]   - response type: ${typeof completed.response}`);
+                    console.log(`[DEBUG]   - response value: ${JSON.stringify(completed.response)?.substring(0, 100)}`);
+                    console.log(`[DEBUG]   - has metadata: ${!!completed.metadata}`);
+                    console.log(`[DEBUG]   - has error: ${!!completed.error}`);
+                    
+                    // ENHANCED: Show what KERIA is actually doing
+                    if (completed.metadata?.ced) {
+                        console.log(`[DEBUG]   - credential SAID: ${completed.metadata.ced.d}`);
+                        console.log(`[DEBUG]   - credential created: YES`);
+                    }
+                    
+                    // Check witness receipt status
+                    if (pollCount % 5 === 0) {  // Every 5 polls, check KERIA logs
+                        console.log(`[DEBUG] ⏰ ${pollCount * 2} seconds elapsed - checking KERIA status...`);
+                        console.log(`[DEBUG] If stuck, check: docker logs vlei-trainings-keria-1 --tail 50`);
+                    }
+                    
+                    // Check for errors
+                    if (completed.error) {
+                        throw new Error(`Credential issuance failed: ${JSON.stringify(completed.error)}`);
+                    }
+                    
+                    // SUCCESS CONDITION: response has actual credential data (not just "absent")
+                    // From past chats: response changes from "absent" → "present" or actual data
+                    // From official training: response contains the actual event data when complete
+                    if (completed.response && 
+                        typeof completed.response === 'object' && 
+                        (completed.response as any).ced?.d) {
+                        console.log(`[DEBUG] ✓ Credential persisted and retrievable (poll ${pollCount})`);
+                        break;
+                    }
+                    
+                    // Alternative check: if done=true and we have metadata with CED
+                    // This handles the case where response might not be populated but metadata is
+                    if (completed.done && completed.metadata?.ced?.d) {
+                        console.log(`[DEBUG] ✓ Credential available in metadata (poll ${pollCount})`);
+                        break;
+                    }
+                    
+                    // Still waiting...
+                    if (pollCount === 1) {
+                        console.log(`[DEBUG] Credential issued, waiting for persistence...`);
+                    }
+                    
+                    // Wait before next poll
+                    await sleep(pollInterval);
+                    
+                } catch (error: any) {
+                    // If GET operation fails, wait and retry
+                    console.log(`[DEBUG] Poll ${pollCount} error: ${error.message}`);
+                    await sleep(pollInterval);
                 }
-                console.log(`[DEBUG] Credential found in metadata despite timeout`);
             }
             
-            if (completed.error) {
-                throw new Error(`Credential issuance failed: ${JSON.stringify(completed.error)}`);
+            // Check if we timed out or if completed is undefined
+            if (!completed) {
+                throw new Error(
+                    `Operation polling failed - no response from KERIA after ${pollCount} polls. ` +
+                    `Check KERIA service status.`
+                );
             }
             
-            // Get SAID from response OR metadata
+            // If we timed out BUT have metadata, this means credential was created but witnesses didn't respond
+            // This is acceptable for development/testing (not production)
+            if (Date.now() - startTime >= maxWaitTime) {
+                if (completed.metadata?.ced?.d) {
+                    console.log(`\n[WARN] ⚠️  Witness Timeout - Using Metadata Fallback`);
+                    console.log(`[WARN] Credential was created but witnesses did not respond within ${maxWaitTime/1000}s`);
+                    console.log(`[WARN] Credential SAID: ${completed.metadata.ced.d}`);
+                    console.log(`[WARN] This credential may not be fully witnessed yet`);
+                    console.log(`[WARN] Acceptable for: Development, Testing`);
+                    console.log(`[WARN] NOT recommended for: Production`);
+                    console.log(`[WARN] `);
+                    console.log(`[WARN] Troubleshooting:`);
+                    console.log(`[WARN]   1. Check witnesses: docker ps | grep witness`);
+                    console.log(`[WARN]   2. Check witness logs: docker logs vlei-witness1`);
+                    console.log(`[WARN]   3. Restart witnesses: docker-compose restart witness1 witness2 witness3`);
+                    console.log(`[WARN]   4. Check network: docker network inspect vlei-network`);
+                    // Continue with metadata - don't throw error
+                } else {
+                    throw new Error(
+                        `Credential persistence timeout after ${pollCount} polls (${maxWaitTime/1000}s). ` +
+                        `Credential may have been issued but not yet persisted to database. ` +
+                        `No metadata available. Check witness network and KERIA logs.`
+                    );
+                }
+            }
+            
+            // Get SAID from response OR metadata (completed is guaranteed to be defined here)
             const credentialSaid = (completed.response as any)?.ced?.d || completed.metadata?.ced?.d;
             
             if (!credentialSaid) {
-                throw new Error('Credential SAID not found');
+                console.error(`[ERROR] No credential SAID found`);
+                console.error(`[ERROR] Response:`, JSON.stringify(completed.response));
+                console.error(`[ERROR] Metadata:`, JSON.stringify(completed.metadata));
+                throw new Error('Credential SAID not found in response or metadata');
             }
             
             console.log(`[DEBUG] Credential SAID: ${credentialSaid}`);
-            
-            if (!completed.done) {
-                console.log(`[WARN] Witnesses have not responded - credential valid but not fully witnessed yet`);
-            }
+            console.log(`[DEBUG] Credential ready after ${pollCount} polls (${(Date.now() - startTime)/1000}s)`);
             
             // Retrieve the full credential from client store (following official pattern)
             // With retry logic to handle witness timing issues

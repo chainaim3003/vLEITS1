@@ -22,9 +22,15 @@ export const VLEI_SCHEMA_CONFIG = {
         },
         // Official Organization Role vLEI Credential Schema
         ORG_ROLE_VLEI: {
-            SAID: 'EH6ekLjSr8V32WyFbGe1zXjTzFs9PkTYmupJ9H65O14g',
+            SAID: 'EBNaNu-M9P5cgrnfl2Fvymy4E_jvxxyjb70PRtiANlJy',
             NAME: 'Official Organization Role vLEI Credential',
-            OOBI: 'http://vlei-server:7723/oobi/EH6ekLjSr8V32WyFbGe1zXjTzFs9PkTYmupJ9H65O14g'
+            OOBI: 'http://vlei-server:7723/oobi/EBNaNu-M9P5cgrnfl2Fvymy4E_jvxxyjb70PRtiANlJy'
+        },
+        // OOR Authorization vLEI Credential Schema (issued by Legal Entity to authorize OOR issuance)
+        OOR_AUTH_VLEI: {
+            SAID: 'EKA57bKBKxr_kN7iN5i7lMUxpMG-s19dRcmov1iDxz-E',
+            NAME: 'OOR Authorization vLEI Credential',
+            OOBI: 'http://vlei-server:7723/oobi/EKA57bKBKxr_kN7iN5i7lMUxpMG-s19dRcmov1iDxz-E'
         },
         // Engagement Context Role vLEI Credential Schema (for AI Agents)
         ECR_VLEI: {

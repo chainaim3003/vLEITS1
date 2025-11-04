@@ -1,23 +1,85 @@
 [
   {
     "alias": "GLEIF_ROOT",
-    "prefix": "ELshkQDE3BK68FedVf3usRzSHhLRyfrVc8d0X973QyHW",
+    "prefix": "EKZmL7-pXztrQ5ufcG_kv8sTLJ4qGqlxkL2eALK1CYvJ",
     "type": "root",
-    "registry": "EJNt-S5nq32o77OkN1OCCzPs9EZ1E42uZ1wzKxCH1IuJ",
+    "registry": "EDX1STTILE1KgjGorekFIaMOPJFb_IqygkZhZfRZp8am",
     "oobis": [
-      "http://keria:3902/oobi/ELshkQDE3BK68FedVf3usRzSHhLRyfrVc8d0X973QyHW/agent/EMoCuF7COTneL3RYE5Q5rigkL4R-cHzjLJJSSxqxsdHl"
+      "http://keria:3902/oobi/EKZmL7-pXztrQ5ufcG_kv8sTLJ4qGqlxkL2eALK1CYvJ/agent/EFQ8-X2OUs9xU0GUAobN1WD44_GS6-enyY-lq78gUmkD"
     ],
-    "createdAt": "2025-11-03T18:25:10.679Z"
+    "createdAt": "2025-11-04T02:12:09.033Z"
   },
   {
     "alias": "QVI",
-    "prefix": "EPJ3u4LLCEhzrLoezKUkYigXUHykP3qw0RFX-Ddgm92_",
+    "prefix": "EIszySpu04hfSuPRmkP6JrLQC918U1sX1LbgBcf9_zGQ",
     "lei": "254900OPPU84GM83MG36",
     "type": "qvi",
-    "registry": "EAY8Znl_SmfhdY3PB0de34wgjwX27S9WA8Qd9UHrIc2c",
+    "registry": "ELsvTJS_i21B-V_1e8hlKLD8LbP5A6-y2qK_q8DeOz26",
     "oobis": [
-      "http://keria:3902/oobi/EPJ3u4LLCEhzrLoezKUkYigXUHykP3qw0RFX-Ddgm92_/agent/EMs-eMhsdaZQnkjGL5oqySbwnk8lcIlcxd_zMfCvZV6D"
+      "http://keria:3902/oobi/EIszySpu04hfSuPRmkP6JrLQC918U1sX1LbgBcf9_zGQ/agent/EKBtxDfWPRvn2UwZ_Iv_pNZuZYSFYjeDTt8T0fladFYV"
     ],
-    "createdAt": "2025-11-03T18:25:27.894Z"
+    "createdAt": "2025-11-04T02:12:28.697Z"
+  },
+  {
+    "alias": "Jupiter_Knitting_Company",
+    "prefix": "EO0uY_fOhOuGN9czC2UZYHyDMCOhnAZjbz6O2LfRyqMj",
+    "lei": "3358004DXAMRWRUIYJ05",
+    "type": "legal-entity",
+    "registry": "EMEGGJIEcidAtcOugGRJmn6zCF7JT_KdjOY0KJYOcIuO",
+    "oobis": [
+      "http://keria:3902/oobi/EO0uY_fOhOuGN9czC2UZYHyDMCOhnAZjbz6O2LfRyqMj/agent/EPxjckVzjKHlc4PDn6GmHWNE47lsuICZq8LlPflIfbKy"
+    ],
+    "createdAt": "2025-11-04T02:12:57.427Z"
+  },
+  {
+    "alias": "Jupiter_Chief_Sales_Officer",
+    "prefix": "EJ-IqZfu-xCCjkAwsmlSN9z2YUhPFqsLA3Pfiq3YDn4M",
+    "type": "person",
+    "role": "ChiefSalesOfficer",
+    "oobis": [
+      "http://keria:3902/oobi/EJ-IqZfu-xCCjkAwsmlSN9z2YUhPFqsLA3Pfiq3YDn4M/agent/EF9r22gupKb-G-hI9QsB1tH8vv7EEMN7WrogyHp0kTu5"
+    ],
+    "createdAt": "2025-11-04T02:13:43.610Z"
+  },
+  {
+    "alias": "jupiterSellerAgent",
+    "prefix": "EHP0AjGijEpImuOEVCFACgPnt5G50W74vaS4H1aSTpsX",
+    "type": "agent",
+    "role": "Seller Agent (AI)",
+    "oobis": [
+      "http://keria:3902/oobi/EHP0AjGijEpImuOEVCFACgPnt5G50W74vaS4H1aSTpsX/agent/EHkNN4L7VnWDzn6jFFaWTSbC1oLM5gGknpi3xHpQGjgU"
+    ],
+    "createdAt": "2025-11-04T02:14:01.209Z"
+  },
+  {
+    "alias": "Tommy_Hilfiger_Europe",
+    "prefix": "EDIBjLJW_PNmdnqYB5q2Oz5cw2q3SsJ1fCxDHF2cXLTc",
+    "lei": "54930012QJWZMYHNJW95",
+    "type": "legal-entity",
+    "registry": "EHTV7RtnXalVwt8rmWavbLiKF03qpILjrqpZD6RX-Tbe",
+    "oobis": [
+      "http://keria:3902/oobi/EDIBjLJW_PNmdnqYB5q2Oz5cw2q3SsJ1fCxDHF2cXLTc/agent/ECLUoECGsNApWLFGJE9Qd07x6z5EBzXzNaz-CDp0lKna"
+    ],
+    "createdAt": "2025-11-04T02:14:20.042Z"
+  },
+  {
+    "alias": "Tommy_Chief_Procurement_Officer",
+    "prefix": "ELAL8OEVndMyw2Qyi3fwLNQqAy-c48SIvnHHq5xeSc0_",
+    "type": "person",
+    "role": "ChiefProcurementOfficer",
+    "oobis": [
+      "http://keria:3902/oobi/ELAL8OEVndMyw2Qyi3fwLNQqAy-c48SIvnHHq5xeSc0_/agent/ELf_ATNaAxMPB5sOOYH-7O4UKDLC-WTv14-sjWv4o5nG"
+    ],
+    "createdAt": "2025-11-04T02:15:10.602Z"
+  },
+  {
+    "alias": "tommyBuyerAgent",
+    "prefix": "EI83HcMqRmyCx58ZPVpbuJC_LoCH-F0QJ5oKf6ODtjUK",
+    "type": "agent",
+    "role": "Buyer Agent (AI)",
+    "oobis": [
+      "http://keria:3902/oobi/EI83HcMqRmyCx58ZPVpbuJC_LoCH-F0QJ5oKf6ODtjUK/agent/EJuCwIopJHd40wjEkl_nHyfWjkfnaUj1HRbU2En6cYU9"
+    ],
+    "createdAt": "2025-11-04T02:15:28.107Z"
   }
 ]
