@@ -211,6 +211,28 @@ export class RealCredentialVerifier {
             }
             
             if (!edgeData) {
+                // Special case: ECR -> OOR may be linked by attribute (personLegalName)
+                // rather than formal edge. This is valid in the official GLEIF flow.
+                if (currentCred.type.includes('Engagement Context Role') && 
+                    nextCred.type.includes('Official Organizational Role')) {
+                    // Verify they're linked by person
+                    const ecrPerson = currentCred.attributes?.personLegalName;
+                    const oorPerson = nextCred.attributes?.personLegalName;
+                    const ecrLEI = currentCred.attributes?.LEI;
+                    const oorLEI = nextCred.attributes?.LEI;
+                    
+                    if (ecrPerson && oorPerson && ecrPerson === oorPerson &&
+                        ecrLEI && oorLEI && ecrLEI === oorLEI) {
+                        edgeResults.push({
+                            from: currentCred.type,
+                            to: nextCred.type,
+                            edgeName: 'attribute-link',
+                            valid: true
+                        });
+                        continue;
+                    }
+                }
+                
                 edgeResults.push({
                     from: currentCred.type,
                     to: nextCred.type,

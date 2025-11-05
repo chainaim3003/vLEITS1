@@ -5,7 +5,14 @@ export interface IdentityData {
     alias: string;
     type: string;
     prefix: string;
+    aid?: string;  // Autonomic Identifier (same as prefix)
+    role?: string;  // Role of the identity (e.g., 'agent', 'person', 'legal-entity')
+    name?: string;  // Human-readable name
+    lei?: string;   // Legal Entity Identifier
     oobi?: string;
+    registry?: string;
+    oobis?: string[];
+    createdAt?: string;
 }
 
 export interface CredentialData {
@@ -42,8 +49,19 @@ export class CredentialDataLoader {
         
         const map = new Map<string, IdentityData>();
         identities.forEach(identity => {
+            // Ensure aid is set (same as prefix if not already set)
+            if (!identity.aid) {
+                identity.aid = identity.prefix;
+            }
+            // Ensure name is set from alias if not already set
+            if (!identity.name && identity.alias) {
+                identity.name = identity.alias;
+            }
             map.set(identity.alias, identity);
             map.set(identity.prefix, identity);
+            if (identity.aid) {
+                map.set(identity.aid, identity);
+            }
         });
         
         return map;
