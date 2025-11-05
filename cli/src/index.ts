@@ -4,6 +4,7 @@ import { Command } from 'commander';
 
 import { SetupVLEICommand } from './commands/setup-vlei.command';
 import { SetupVLEIOfficialCommand } from './commands/setup-vlei-official.command';
+import { verifyOfficialCommand } from './commands/verify-official.command';
 import { StorageService } from './services/storage.service';
 import { ConsoleUtils } from './utils/console.utils';
 
@@ -36,6 +37,18 @@ program
         try {
             const command = new SetupVLEIOfficialCommand();
             await command.execute();
+        } catch (error: any) {
+            ConsoleUtils.error(`Error: ${error.message}`);
+            process.exit(1);
+        }
+    });
+
+program
+    .command('verify-official')
+    .description('Verify all credentials from official GLEIF setup')
+    .action(async () => {
+        try {
+            await verifyOfficialCommand();
         } catch (error: any) {
             ConsoleUtils.error(`Error: ${error.message}`);
             process.exit(1);

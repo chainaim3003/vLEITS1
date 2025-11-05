@@ -10,6 +10,7 @@
     "schema-server": "node schema-server.js",
     "setup:vlei": "npm run build && node build/index.js setup-vlei",
     "setup:vlei-official": "npm run build && node build/index.js setup-vlei-official",
+    "test:verify-official": "npm run build && node build/index.js verify-official",
     "dev": "ts-node src/index.ts",
     "clean": "rm -rf build data/*.json",
     "test": "echo \"No tests yet\" && exit 0"
